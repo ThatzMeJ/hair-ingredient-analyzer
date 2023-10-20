@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "types": "module",
+  "type": "module",
   "dependencies": {
     "puppeteer": "^21.3.6"
   }
