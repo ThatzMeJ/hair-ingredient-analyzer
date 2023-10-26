@@ -32,20 +32,52 @@ const scrapeWebsite = async () => {
       links.push(elements.href);
     }
     return links;
-  })
-  
+  });
 
   for (const url of productUrls) {
-    await page.goto(url); 
+    await page.goto(url);
     await page.waitForSelector('div.grid-col.grid-col-md-6.title-and-description');
     await page.click('div.closed.card-header');
 
     const ingredients = await page.evaluate(() => {
-      const ingredientsElement = document.querySelector('div.ingredients-text'); 
+      const ingredientsElement = document.querySelector('div.ingredients-text');
       return ingredientsElement ? ingredientsElement.innerText : 'Ingredients not found';
     });
-    console.log('Ingredients for', url, ':', ingredients);
+
+    // Extract individual ingredients and update the count
+    const ingredientList = ingredients.split(', '); // Assuming ingredients are separated by commas
+    for (const ingredient of ingredientList) {
+      if (ingredient in allIngredients) {
+        allIngredients[ingredient]++;
+      } else {
+        allIngredients[ingredient] = 1;
+      }
+    }
   }
+  
+  //Convert the object into an array to sort into descending order then back into an object
+  const ingredientArray = Object.entries(allIngredients);
+  ingredientArray.sort((a, b) => b[1] - a[1]);
+  const sortedIngredients = Object.fromEntries(ingredientArray);
+
+  console.log('Ingredients count: ', sortedIngredients);
+
+  
+  //Original Code 
+
+  // for (const url of productUrls) {
+  //   await page.goto(url); 
+  //   await page.waitForSelector('div.grid-col.grid-col-md-6.title-and-description');
+  //   await page.click('div.closed.card-header');
+
+  //   const ingredients = await page.evaluate(() => {
+  //     const ingredientsElement = document.querySelector('div.ingredients-text'); 
+  //     return ingredientsElement ? ingredientsElement.innerText : 'Ingredients not found';
+  //   });
+  //   console.log('Ingredients for', url, ':', ingredients);
+
+
+  // }
 
   setTimeout(async () => {
     await browser.close();
