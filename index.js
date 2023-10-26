@@ -7,6 +7,8 @@ const scrapeWebsite = async () => {
     defaultViewport: null
   });
 
+  const allIngredients = {};
+
   const page = await browser.newPage();
   await page.goto('https://www.sheamoisture.com/', {
     waitUntil: "domcontentloaded",
@@ -17,45 +19,33 @@ const scrapeWebsite = async () => {
   //Clicking the hair dropbox in navbar
   await page.click('.c-header-menu > .c-header-menu-item');
   await page.waitForSelector('.c-header-dropdown-menu-group');
-  // await page.click('.c-link');
+
   await page.click(".c-header-dropdown-wrapper > .c-header-dropdown-section > .c-header-dropdown-menu > .c-header-dropdown-menu-group:nth-child(2) > .c-header-dropdown-menu-list > .c-header-dropdown-menu-item");
 
   await page.waitForSelector('.button.button.button-septenary.button-size-sm.button-size-sm-.button-form-br-50.product-card__add-to-cart');
-  // const productUrls = await page.evaluate(() => {
-  //   const h3Tags = document.querySelectorAll('h3.product-card__title');
-  //   return Array.from(h3Tags, element => element.querySelector('a.col-6.col-md-4.mb-3.c-link').href);
-  // });
 
-  // const productUrls = await page.evaluate(() => {
-  //   const h3Tags = document.querySelectorAll('h3.product-card__title');
-  //   return Array.from(h3Tags, element => {
-  //     const anchor = element.querySelector('a.col-6');
-  //     return anchor ? anchor.href : null;
-  //   });
-  // });
-
+  //To get each href attribute from each a tag for all the products I wanna scrape!
   const productUrls = await page.evaluate(() => {
-    Array.from()
+    let links = [];
+    let elements2 = document.querySelectorAll('a.col-6.col-md-4.mb-3.c-link');
+    for (let elements of elements2) {
+      links.push(elements.href);
+    }
+    return links;
   })
   
 
-  for(const url of productUrls) {
-    console.log(url)
+  for (const url of productUrls) {
+    await page.goto(url); 
+    await page.waitForSelector('div.grid-col.grid-col-md-6.title-and-description');
+    await page.click('div.closed.card-header');
+
+    const ingredients = await page.evaluate(() => {
+      const ingredientsElement = document.querySelector('div.ingredients-text'); 
+      return ingredientsElement ? ingredientsElement.innerText : 'Ingredients not found';
+    });
+    console.log('Ingredients for', url, ':', ingredients);
   }
-
-
-
-  // const scrapedData = [];
-
-  // for (const url of productUrls) {
-  //   await page.goto(url);
-  
-  //   // Implement your scraping logic for ingredient data specific to the product page
-   
-  // }
-
-  // console.log('Scraped Data for All Products:', scrapedData);
-
 
   setTimeout(async () => {
     await browser.close();
